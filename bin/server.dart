@@ -6,14 +6,17 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import 'dataset.dart';
+import 'sql_handler.dart';
 
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
-  ..get('/echo/<message>', _echoHandler)
+  ..get('/echo/message:<message>', _echoHandler)
   ..get('/getDatasetbyDate', _getDatasetbyDate)
-  ..get('/turnPumpOn', _getDatasetbyDate)
-  ..get('/setFanState/<newState>', _setFanState);
+  ..get(
+      '/updateDeviceState/device:<device>&state:<newstate>', _updateDeviceState)
+  ..get('/turnPumpOn', _getDatasetbyDate);
+//..get('/setFanState/<newState>', _setFanState);
 
 Response _rootHandler(Request req) {
   return Response.ok('Hello, World!\n');
@@ -25,12 +28,10 @@ Response _getDatasetbyDate(Request req) {
 
   try {
     String json = "[";
-
     datasets.forEach((element) {
       //print(element.toJson().toString());
       json += element.toJson().toString();
     });
-
     json += "]";
 
     //String json = jsonEncode(datasets as Map<String, dynamic>);
@@ -40,8 +41,9 @@ Response _getDatasetbyDate(Request req) {
   }
 }
 
-Response _setFanState(Request request) {
-  final newState = request.params['newState'];
+Response _updateDeviceState(Request request) {
+  final newState = request.params['newstate'];
+  final device = request.params['device'];
 
   try {
     bool newStateBool = true;
@@ -52,12 +54,13 @@ Response _setFanState(Request request) {
     } else if (newState.toLowerCase() == 'true') {
       newStateBool = true;
     } else {
-      Response.badRequest(body: 'ERROR 500: No functioning input detected');
+      return Response.badRequest(body: 'ERROR 500: No valid input detected');
     }
 
-    return Response.ok('200: ${newStateBool.toString()}');
+    return Response.ok('200: $device updated to $newState');
   } catch (e) {
-    return Response.badRequest(body: 'ERROR 500: Could not change Fan State');
+    return Response.badRequest(
+        body: 'ERROR 500: Could not change State of $device');
   }
 }
 
@@ -67,6 +70,8 @@ Response _echoHandler(Request request) {
 }
 
 void main(List<String> args) async {
+  print('Loading Webserver settings...');
+
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
 
@@ -75,6 +80,15 @@ void main(List<String> args) async {
 
   // For running in containers, we respect the PORT environment variable.
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
-  final server = await serve(handler, ip, port);
-  print('Server listening on ${ip.address}:${port}');
+  final server;
+
+  print('Connecting to SQL Server...');
+  if (await SQLHandler.connectToSQLServer(SQLHandler.settings)) {
+    print('INFO: SQL Server connection established');
+
+    server = await serve(handler, ip, port);
+    print('INFO: Server listening on ${ip.address}:${port}');
+  } else {
+    print('ERROR: Could not load SQL Server\nINFO: Shutting down webserver!');
+  }
 }

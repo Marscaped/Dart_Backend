@@ -1,3 +1,5 @@
+import 'package:mysql1/mysql1.dart';
+
 class Dataset {
   int id;
   DateTime time;

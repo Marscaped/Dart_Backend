@@ -12,6 +12,7 @@ final _router = Router()
   ..get('/', _rootHandler)
   ..get('/echo/<message>', _echoHandler)
   ..get('/getDatasetbyDate', _getDatasetbyDate)
+  ..get('/turnPumpOn', _getDatasetbyDate)
   ..get('/setFanState/<newState>', _setFanState);
 
 Response _rootHandler(Request req) {
@@ -23,11 +24,14 @@ Response _getDatasetbyDate(Request req) {
       Dataset.getDatasetFromDatabaseByDate(DateTime.now(), DateTime.now());
 
   try {
-    String json = "";
+    String json = "[";
 
     datasets.forEach((element) {
-      json += jsonEncode(element.toJson());
+      //print(element.toJson().toString());
+      json += element.toJson().toString();
     });
+
+    json += "]";
 
     //String json = jsonEncode(datasets as Map<String, dynamic>);
     return Response.ok(json);

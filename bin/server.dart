@@ -23,7 +23,13 @@ Response _getDatasetbyDate(Request req) {
       Dataset.getDatasetFromDatabaseByDate(DateTime.now(), DateTime.now());
 
   try {
-    String json = jsonEncode(datasets as Map<String, dynamic>);
+    String json = "";
+
+    datasets.forEach((element) {
+      json += jsonEncode(element.toJson());
+    });
+
+    //String json = jsonEncode(datasets as Map<String, dynamic>);
     return Response.ok(json);
   } catch (e) {
     return Response.badRequest(body: "500: ERROR in JSON ENCODIG");
@@ -40,7 +46,7 @@ Response _setFanState(Request request) {
     if (newState!.toLowerCase() == 'false') {
       newStateBool = false;
     } else if (newState.toLowerCase() == 'true') {
-      bool newStateBool = true;
+      newStateBool = true;
     } else {
       Response.badRequest(body: 'ERROR 500: No functioning input detected');
     }

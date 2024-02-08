@@ -4,9 +4,9 @@ class SQLHandler {
   static ConnectionSettings settings = ConnectionSettings(
     host: 'localhost',
     port: 3306,
-    user: 'bob',
-    password: 'wibble',
-    db: 'mydb',
+    user: 'admin',
+    password: 'admin',
+    db: 'mars_garden',
   );
 
   static MySqlConnection? conn;

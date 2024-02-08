@@ -57,6 +57,8 @@ Response _updateDeviceState(Request request) {
       return Response.badRequest(body: 'ERROR 500: No valid input detected');
     }
 
+    // TODO: SEND ACTION TO ARDUINO
+
     return Response.ok('200: $device updated to $newState');
   } catch (e) {
     return Response.badRequest(
@@ -74,6 +76,10 @@ void main(List<String> args) async {
 
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
+  final constIP = InternetAddress(
+    '192.198.1.10',
+    type: InternetAddressType.IPv4,
+  );
 
   // Configure a pipeline that logs requests.
   final handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);
@@ -87,7 +93,7 @@ void main(List<String> args) async {
     print('INFO: SQL Server connection established');
 
     server = await serve(handler, ip, port);
-    print('INFO: Server listening on ${ip.address}:${port}');
+    print('INFO: Server listening on ${ip.address}:$port');
   } else {
     print('ERROR: Could not load SQL Server\nINFO: Shutting down webserver!');
   }

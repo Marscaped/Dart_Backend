@@ -4,14 +4,19 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:http/http.dart' as http;
 
 import 'dataset.dart';
 import 'sql_handler.dart';
+
+final String arduinoIP = "192.186.10.2";
+final String arduinoPort = "80";
 
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
   ..get('/echo/message:<message>', _echoHandler)
+  ..get('/getTemperatureFromSensor', _echoHandler)
   ..get('/getDatasetbyDate', _getDatasetbyDate)
   ..get(
       '/updateDeviceState?device:<device>&state:<newstate>', _updateDeviceState)
@@ -41,7 +46,22 @@ Response _getDatasetbyDate(Request req) {
   }
 }
 
-Response _updateDeviceState(Request request) {
+Future<Response> _getTemperatureFromSensor(Request request) async {
+  try {
+    var result = await http.get(
+      Uri.http(
+        "$arduinoIP:$arduinoPort",
+        "/getTemperatureFromSensor",
+      ),
+    );
+
+    return Response.ok(result.body);
+  } catch (e) {
+    return Response.badRequest(body: 'ERROR 500: Could not get Data');
+  }
+}
+
+Future<Response> _updateDeviceState(Request request) async {
   final newState = request.params['newstate'];
   final device = request.params['device'];
 
@@ -58,6 +78,18 @@ Response _updateDeviceState(Request request) {
     }
 
     // TODO: SEND ACTION TO ARDUINO
+    var result = await http.get(
+      Uri.http(
+        "$arduinoIP:$arduinoPort",
+        "/ChangeDeviceState",
+        {
+          "newstate": newState,
+          "device": device,
+        },
+      ),
+    );
+
+    if (result.statusCode != 200) {}
 
     return Response.ok('200: $device updated to $newState');
   } catch (e) {

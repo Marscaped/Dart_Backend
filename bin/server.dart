@@ -14,8 +14,8 @@ final _router = Router()
   ..get('/echo/message:<message>', _echoHandler)
   ..get('/getDatasetbyDate', _getDatasetbyDate)
   ..get(
-      '/updateDeviceState/device:<device>&state:<newstate>', _updateDeviceState)
-  ..get('/turnPumpOn', _getDatasetbyDate);
+      '/updateDeviceState?device:<device>&state:<newstate>', _updateDeviceState)
+  ..get('/turnPumpOn?duration:<duration>', _getDatasetbyDate);
 //..get('/setFanState/<newState>', _setFanState);
 
 Response _rootHandler(Request req) {
@@ -95,6 +95,6 @@ void main(List<String> args) async {
     server = await serve(handler, ip, port);
     print('INFO: Server listening on ${ip.address}:$port');
   } else {
-    print('ERROR: Could not load SQL Server\nINFO: Shutting down webserver!');
+    print('ERROR: Could not load SQL Server\nINFO: Shutting down Webserver!');
   }
 }

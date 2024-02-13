@@ -16,7 +16,7 @@ class User {
     return true;
   }
 
-  bool changeUserPermission(bool read, bool write, bool admin) {
+  String changeUserPermission(bool read, bool write, bool admin) {
     String newPermissions = "";
 
     if (read) {
@@ -33,6 +33,6 @@ class User {
 
     // TODO: UPDATE USER IN DATABASE
 
-    return true;
+    return "Updated Users Permission to: $newPermissions";
   }
 }
